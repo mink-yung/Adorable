@@ -4,7 +4,7 @@ from discord.ext import commands
 bot = commands.Bot(command_prefix='')
 TOKEN = 'ODI0NTQxNDU5NjYzMDI4MjM0.YFw4Ew.IgEBMfTimhDR1CBjAvsIfIW69DM'
 
-#aaa
+#aaabbb
 @bot.event
 async def on_ready():
     await bot.change_presence(status=discord.Status.online, activity=discord.Game('공부'))

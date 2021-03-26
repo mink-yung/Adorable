@@ -34,7 +34,7 @@ async def gihyeon(ctx):
 
 @bot.command(aliases=['알려줘', '도움말'])
 async def dora_inform(ctx):
-    await ctx.channel.send('도라는 아직 배우는중이야! 나중에 알려줄게!')
+    await ctx.channel.send('도라는 아직 배우는중이야! 나중에 알려주께!')
 
 
 @bot.command(aliases=['도라야', '어도라', '도라'])
@@ -42,10 +42,17 @@ async def hey_adora(ctx):
     await ctx.channel.send('웅!도라 여기떠!!')
 
 
+
 @bot.command(aliases=['삭제'])
 async def delete(ctx, num: int = 2):
     await ctx.channel.purge(limit=num)
     await ctx.channel.send('비밀이양!!')
+
+
+@bot.command(aliases=['시발','씨발년아','ㅅ1발','새끼','병신','도라병신','씨빨','씨발','삭제'])
+async def delete(ctx, num: int = 2):
+    await ctx.channel.purge(limit=1)
+    await ctx.channel.send('욕은나빠!!')
 
 
 bot.run(TOKEN)

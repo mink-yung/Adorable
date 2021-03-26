@@ -3,10 +3,12 @@ import discord
 from discord.ext import commands
 
 bot = commands.Bot(command_prefix='')
-aa = "T0RJME5UUXhORFU1TmpZek1ESTRNak0wLllGdzRFdy5vM3I2WHYyLUFhNHpBNFpXbXI3TmN1T1F2a3c="
-bb=base64.b64decode(aa)
-print (bb.decode("ascii"))
-TOKEN = bb.decode("ascii")
+fake = "T0RJME5UUXhORFU1TmpZek1ESTRNak0wLllGdzRFdy5vM3I2WHYyLUFhNHpBNFpXbXI3TmN1T1F2a3c="
+secret_code = base64.b64decode(fake)
+print(secret_code.decode("ascii"))
+TOKEN = secret_code.decode("ascii")
+
+
 @bot.event
 async def on_ready():
     await bot.change_presence(status=discord.Status.online, activity=discord.Game('공부'))

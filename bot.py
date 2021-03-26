@@ -22,19 +22,24 @@ async def on_message(msg):
     await bot.process_commands(msg)
 
 
-@bot.command(aliases=['안녕', '도라야 안녕'])
+@bot.command(aliases=['안녕'])
 async def hello(ctx):
     await ctx.channel.send('안녕!')
-
-
-@bot.command(aliases=['도라야', '어도라', '도라'])
-async def hey_adora(ctx):
-    await ctx.channel.send('웅!도라 여기떠!!')
 
 
 @bot.command(aliases=['기현이', '전기현', '기현'])
 async def gihyeon(ctx):
     await ctx.channel.send('나나난나ㅏ 나 그거 알아!!수원의 카사노바!!')
+
+
+@bot.command(aliases=['알려줘', '도움말'])
+async def dora_inform(ctx):
+    await ctx.channel.send('도라는 아직 배우는중이야! 나중에 알려줄게!')
+
+
+@bot.command(aliases=['도라야', '어도라', '도라'])
+async def hey_adora(ctx):
+    await ctx.channel.send('웅!도라 여기떠!!')
 
 
 @bot.command(aliases=['삭제'])

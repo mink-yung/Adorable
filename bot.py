@@ -1,10 +1,12 @@
+import base64
 import discord
 from discord.ext import commands
 
 bot = commands.Bot(command_prefix='')
-TOKEN = 'ODI0NTQxNDU5NjYzMDI4MjM0.YFw4Ew.az0ewZcZ_VYDXYiEQIde6APvw28'
-
-
+aa = "T0RJME5UUXhORFU1TmpZek1ESTRNak0wLllGdzRFdy5vM3I2WHYyLUFhNHpBNFpXbXI3TmN1T1F2a3c="
+bb=base64.b64decode(aa)
+print (bb.decode("ascii"))
+TOKEN = bb.decode("ascii")
 @bot.event
 async def on_ready():
     await bot.change_presence(status=discord.Status.online, activity=discord.Game('공부'))
@@ -23,7 +25,7 @@ async def hello(ctx):
     await ctx.channel.send('안녕!')
 
 
-@bot.command(aliases=['도라야', '어도라', '어도라블'])
+@bot.command(aliases=['도라야', '어도라', '도라'])
 async def hey_adora(ctx):
     await ctx.channel.send('웅!도라 여기떠!!')
 

@@ -1,0 +1,778 @@
+﻿import random
+from asyncio import sleep
+from itertools import cycle
+
+import discord
+from discord.ext import commands, tasks
+
+playing = cycle(["테스트", "너생각", "5개의 서버와 함께"])
+
+bot = commands.Bot(command_prefix='!')
+
+king_game = []
+
+
+@tasks.loop(minutes=0.1)
+async def changes_status():
+    await bot.change_presence(activity=discord.Game(next(playing)))
+
+
+@bot.event
+async def on_ready():
+    print("Ollesh Online!")
+    print(f"봇 이름: {bot.user.name}")
+    print(f"아이디: {bot.user.id}")
+    changes_status.start()
+
+
+@bot.event
+async def on_guild_join(guild, ctx):
+    for channel in guild.text_channels:
+        if channel.permissions_for(guild.me).send_messages:
+            await ctx.send("안녕! 나는 Ollesh!")
+            break
+
+
+@bot.command(name='안녕', aliases=["ㅎㅇ"])
+async def hello(ctx):
+    if str(ctx.message.author) in ("영철#6955", "배추스무디#4586", "민호#3694"):
+        embed = discord.Embed()
+        embed.set_image(
+            url="https://cdn.discordapp.com/attachments/789890170681163796/789912886498689064/20201220_021652.png")
+
+        await ctx.send(embed=embed)
+    else:
+        await ctx.send("안녕!")
+
+
+@bot.command(name='메시지', aliases=["메세지", "핑", "ping", "Ping", "PING"])
+async def send_message(ctx):
+    try:
+        await bot.get_user(ctx.author.id).send("pong!")
+    except discord.errors.Forbidden:
+        await ctx.send(f"{ctx.message.author.mention}\n 메시지를 보낼 수 없어ㅠㅠ")
+        embed = discord.Embed(title='메시지 허용하기', description='메시지 허용하는 법', color=0x00ff00)
+        embed.add_field(name='개인 설정', value='1."사용자 설정" 클릭\n2."개인정보 보호 및 보안"탭에서\n3.개인 메시지 허용',
+                        inline=False)
+        embed.add_field(name='서버 설정', value='1.서버이름 클릭\n2."개인정보 보호 설정" 클릭\n3.개인 메시지 허용', inline=False)
+
+        await ctx.send(embed=embed)
+
+
+@bot.command(name='도움말', aliases=["명령어", "도움", '정보'])
+async def help_(ctx, hlp: str = None):
+    embed = None
+    if hlp is None:
+        embed = discord.Embed(title='Ollesh', description='Discord Project - Ollesh', color=0x00ff00)
+        embed.add_field(name='!도움말 [명령어]',
+                        value='안녕, 게임, 핑, 들어와, 나가, 지우개, 채금, 채금해제, 김영철, 황해찬, 주사위, 왕게임, 계산',
+                        inline=False)
+        embed.set_footer(
+            text='[Ollesh Project] by qasw405@gmail.com',
+            icon_url='https://media.istockphoto.com/vectors/'
+                     'cyclops-icon-vector-from-fantastic-characters-collection-thin-line-vector-id1143608293?s=170x170')
+        embed.set_thumbnail(
+            url='https://media.istockphoto.com/vectors/'
+                'cyclops-icon-vector-from-fantastic-characters-collection-thin-line-vector-id1143608293?s=170x170')
+
+    elif hlp == '안녕':
+        embed = discord.Embed(title='안녕', description='!안녕', color=0x00ff00)
+        embed.add_field(name='!안녕', value='Ollesh가 여러분께 인사를 해줍니다.', inline=False)
+
+    elif hlp == '게임':
+        embed = discord.Embed(title='게임', description='!게임', color=0x00ff00)
+        embed.add_field(name='!게임 [게임이름]', value='Ollesh가 게임을 설명합니다.', inline=False)
+
+    elif hlp in ('핑', 'ping', '메시지'):
+        embed = discord.Embed(title='핑', description='!핑, !ping, !메시지', color=0x00ff00)
+        embed.add_field(name='!핑', value='Ollesh가 개인 메시지를 보냅니다.', inline=False)
+
+    elif hlp in ('들어와', '같이놀자'):
+        embed = discord.Embed(title='들어와', description='!들어와, !같이놀자, !음성', color=0x00ff00)
+        embed.add_field(name='!들어와', value='Ollesh가 음성채널에 참가합니다.', inline=False)
+
+    elif hlp in ('나가', '꺼져', 'ㄲㅈ'):
+        embed = discord.Embed(title='나가', description='!나가, !꺼져, !ㄲㅈ', color=0x00ff00)
+        embed.add_field(name='!나가', value='Ollesh가 음성채널에서 퇴장합니다.', inline=False)
+
+    elif hlp in ('지우개', '청소', '삭제'):
+        embed = discord.Embed(title='지우개', description='!지우개, !청소, !삭제', color=0x00ff00)
+        embed.add_field(name='!지우개 / !지우개 [메시지 수]', value='Ollesh가 채팅을 지웁니다.', inline=False)
+
+    elif hlp in ('채금', '채팅금지', '쉿'):
+        embed = discord.Embed(title='채금', description='!채금, !채팅금지, !쉿', color=0x00ff00)
+        embed.add_field(name='!채금 [멘션]', value='Ollesh가 채팅 권한을 빼앗습니다.', inline=False)
+
+    elif hlp in ('채금해제', '해제', '해방'):
+        embed = discord.Embed(title='채금해제', description='!채금해제, !해제, !해방', color=0x00ff00)
+        embed.add_field(name='!해제 [멘션]', value='Ollesh가 채금을 해제합니다.', inline=False)
+
+    elif hlp in ('김영철', '영철'):
+        embed = discord.Embed(title='김영철', description='!김영철, !영철', color=0x00ff00)
+        embed.add_field(name='!김영철 [스킨]', value='Ollesh가 챔피언[김영철]의 스킨들을 보여줍니다.', inline=False)
+
+    elif hlp in ('황해찬', '해찬'):
+        embed = discord.Embed(title='황해찬', description='!황해찬, !해찬', color=0x00ff00)
+        embed.add_field(name='!황해찬 [스킨]', value='Ollesh가 챔피언[황해찬]의 스킨들을 보여줍니다.', inline=False)
+
+    elif hlp == '주사위':
+        embed = discord.Embed(title='주사위', description='!주사위', color=0x00ff00)
+        embed.add_field(name='!주사위 / !주사위 [멘션] / !주사위 [멘션] [숫자]', value='Ollesh가 주사위를 굴립니다.',
+                        inline=False)
+
+    elif hlp == '왕게임':
+        embed = discord.Embed(title='왕게임', description='!왕게임', color=0x00ff00)
+        embed.add_field(name='!왕게임 / !왕게임 [참여] / !왕게임 [목록] / !왕게임 [취소] / !왕게임 [시작]',
+                        value='Ollesh가 왕게임을 진행합니다.', inline=False)
+
+    elif hlp in ('계산', '계산기', '짝짝스'):
+        embed = discord.Embed(title='계산기', description='!계산기, !계산, !짝짝스', color=0x00ff00)
+        embed.add_field(name='!계산 [계산 식]', value='Ollesh가 계산을 도와줍니다.', inline=False)
+
+    await ctx.send(embed=embed)
+
+
+@bot.command(name='게임', aliases=['게임정보'])
+async def game_(ctx, game: str = None):
+    if game is None:
+        await ctx.send("알아볼 게임을 같이 입력해줘:(원신, 롤, 블랙서바이벌, 레식)")
+
+    elif game == "원신":
+        embed = discord.Embed(title='원신(Genshin Impact)', url='https://genshin.mihoyo.com/en', color=0x00ff00)
+        embed.add_field(name='개발', value='miHoYo Network Technology', inline=False)
+        embed.add_field(name='유통', value='중국 모바일: 탭탭', inline=False)
+        embed.add_field(name='플랫폼', value='Windows, Android, IOS, PS4, Nintendo Switch', inline=False)
+        embed.add_field(name='장르', value='3인칭 오픈 월드 액션 어드벤처', inline=False)
+        embed.add_field(name='출시', value='중국: 2020년 9월 15일\n글로벌: 2020년 9월 28일', inline=False)
+        embed.add_field(name='엔진', value='Unity', inline=False)
+        embed.add_field(name='한국어 지원', value='지원', inline=False)
+        embed.add_field(name='심의 등급', value='15세 이용가', inline=False)
+        embed.set_image(url="https://uploadstatic-sea.mihoyo.com/contentweb/20200610/2020061020274229958.png")
+        embed.set_thumbnail(
+            url="https://encrypted-tbn0.gstatic.com/images?q=tbn%3AANd9GcTIqNV130pKbzpnglIIrHw5V5ytKbD_Z2CnKg&usqp=CAU")
+        embed.set_footer(text='原神Project')
+
+        await ctx.send(embed=embed)
+
+    elif game in ("블서", "블랙서바이벌"):
+        embed = discord.Embed(title='영원회귀: 블랙서바이벌(Eternal Return: Black survival)',
+                              url='https://playeternalreturn.com/ko/', color=0x00ff00)
+        embed.add_field(name='개발', value='님블뉴런', inline=False)
+        embed.add_field(name='유통', value='님블뉴런', inline=False)
+        embed.add_field(name='플랫폼', value='PC', inline=False)
+        embed.add_field(name='장르', value='쿼터뷰 - 배틀로얄', inline=False)
+        embed.add_field(name='출시', value='2020.10.14(얼리 엑세스)\n2021년 말(정식 출시)', inline=False)
+        embed.add_field(name='엔진', value='미상', inline=False)
+        embed.add_field(name='한국어 지원', value='지원', inline=False)
+        embed.add_field(name='심의 등급', value='15세 이용가', inline=False)
+        embed.set_image(url="https://image.zdnet.co.kr/2020/10/14/002e85b3765a0656aa3de8a33bf43d92.jpg")
+        embed.set_thumbnail(
+            url="https://cdn-images-1.medium.com/max/800/1*SSzVP6NosRH44XvA1I8UpQ.png")
+        embed.set_footer(text='Eternal Return: Black survival')
+
+        await ctx.send(embed=embed)
+
+    elif game in ("롤", "리그오브레전드"):
+        embed = discord.Embed(title='리그 오브 레전드(League of Legends)', url='https://kr.leagueoflegends.com/ko-kr/',
+                              color=0x00ff00)
+        embed.add_field(name='개발', value='RIOT GAMES', inline=False)
+        embed.add_field(name='유통', value='RIOT GAMES', inline=False)
+        embed.add_field(name='플랫폼', value='Windows, macOS', inline=False)
+        embed.add_field(name='장르', value='MOBA', inline=False)
+        embed.add_field(name='출시', value='최초: 2009년 10월 27일\n한국: 2011년 12월 4일', inline=False)
+        embed.add_field(name='엔진', value='자체 개발 엔진', inline=False)
+        embed.add_field(name='한국어 지원', value='지원', inline=False)
+        embed.add_field(name='심의 등급', value='12세 이용가', inline=False)
+        # noinspection SpellCheckingInspection
+        embed.set_image(
+            url="https://images.contentstack.io/v3/assets/"
+                "blt731acb42bb3d1659/bltcfa4652c8d383f56/5e21837f63d1b6503160d39b/Home-page.jpg")
+        embed.set_thumbnail(
+            url="http://file3.instiz.net/data/file3/2019/09/19/7/1/0/710840847c3faa9bf6ef006bdb6d91d0.jpg")
+        embed.set_footer(text='LEAGUE OF LEGENDS')
+
+        await ctx.send(embed=embed)
+
+    elif game in ("레식", "시즈", "레인보우식스"):
+        embed = discord.Embed(title='톰 클랜시의 레인보우 식스 시즈(Tom Clancy\'s Rainbow Six Siege)',
+                              url='https://www.ubisoft.com/ko-kr/game/rainbow-six/siege', color=0x00ff00)
+        embed.add_field(name='개발', value='유비소프트 몬트리올', inline=False)
+        embed.add_field(name='유통', value='유비소프트', inline=False)
+        embed.add_field(name='플랫폼', value='Windows, PS4, PS5, XBOX ONE, XBOX-X', inline=False)
+        embed.add_field(name='장르', value='전술 FPS', inline=False)
+        embed.add_field(name='출시', value='글로벌: 2015년 12월 1일\n한국 PC방: 2019년 8월 1일', inline=False)
+        embed.add_field(name='엔진', value='AnvilNext 2.0', inline=False)
+        embed.add_field(name='한국어 지원', value='자막 한국어화', inline=False)
+        embed.add_field(name='심의 등급', value='청소년 이용불가', inline=False)
+        embed.set_image(url="https://blog.kakaocdn.net/dn/TPyFB/btqxKq6yY8n/of8sTVFnaNrYbPGqbSFcl1/img.webp")
+        embed.set_thumbnail(url="https://downloadwap.com/thumbs2/wallpapers/p2/2019/games/27/2afce82c13069035.jpg")
+        embed.set_footer(text='Tom Clancy\'s Rainbow Six Siege')
+
+        await ctx.send(embed=embed)
+
+    elif game in ("메이플", "메이플스토리"):
+        embed = discord.Embed(title='메이플스토리(MapleStory)',
+                              url='https://maplestory.nexon.com/Home/Main', color=0x00ff00)
+        embed.add_field(name='개발', value='네오위즈', inline=False)
+        embed.add_field(name='유통', value='넥슨', inline=False)
+        embed.add_field(name='플랫폼', value='Windows', inline=False)
+        embed.add_field(name='장르', value='MMORPG', inline=False)
+        embed.add_field(name='출시', value='2003년 4월 29일', inline=False)
+        embed.add_field(name='엔진', value='자체 개발 엔진', inline=False)
+        embed.add_field(name='한국어 지원', value='지원', inline=False)
+        embed.add_field(name='심의 등급', value='전체이용가', inline=False)
+        embed.set_image(
+            url="https://lh3.googleusercontent.com/proxy/"
+                "qd4OgKryrWuXBt0T5wGqu6GXuqI0IrOVWT81gly7t4aYcBMRZzEFAcrQKZo_o3eAJv8IYkX1x3GfoDxPC9t67O5S"
+                "-66mnhbniIgiGnsK3ebXr7_vqfftXOtorT80GwYNH8g98rFoZboZg-PaHHW3V-zMTmkflFYv")
+        embed.set_thumbnail(
+            url="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcStoWlSfskVeITb1LyAuQCauH9MpeI79RZE5A&usqp=CAU")
+        embed.set_footer(text='MapleStory')
+
+        await ctx.send(embed=embed)
+
+
+@bot.listen()
+async def on_message(ctx):
+    if ctx.author.bot:
+        return
+    '''
+    elif ctx.content.startswith('!'):
+        await ctx.channel.send('현재 `discord_Ollesh_v0.0`는 개발이 중단되었습니다.')
+        await ctx.channel.send('`_!`로 `discord_Ollesh_v0.1`을 테스트할 수 있습니다.')
+    '''
+    print(f'({ctx.guild}) {ctx.channel}채널 에서 {ctx.author}:{ctx.content}')
+
+
+@bot.command(name='들어와', aliases=["같이놀자", "음성"])
+async def join_in(ctx):
+    channel = ctx.author.voice.channel
+    await channel.connect()
+
+
+@bot.command(name='나가', aliases=["꺼져", "ㄲㅈ"])
+async def get_off(ctx):
+    await ctx.voice_client.disconnect()
+
+
+@bot.command(name='지우개', aliases=["청소", "삭제"])
+async def erase(ctx, number: int = None):
+    if ctx.guild:
+        if ctx.message.author.guild_permissions.manage_messages:
+            if number is None:
+                deleted = await ctx.message.channel.purge(limit=2)
+                await ctx.send(f'{ctx.message.author.mention}이(가) {len(deleted) - 1}개의 메세지를 삭제했어!')
+            elif 50 < number:
+                await ctx.message.delete()
+                await ctx.send(f'{ctx.message.author.mention} 최대 50개 까지만 지울 수 있어', delete_after=5)
+            else:
+                deleted = await ctx.message.channel.purge(limit=number + 1)
+                await ctx.send(f'{ctx.message.author.mention}이(가) `{len(deleted) - 1}`개의 메세지를 삭제했어!')
+        else:
+            await ctx.send('삭제 할 수 있는 권한이 없어ㅠㅠ')
+    else:
+        await ctx.send('개인메시지는 삭제할 수 없어ㅠㅠ')
+
+
+@bot.command(name='주사위')
+async def dice(ctx, member: discord.Member = None, number: int = None):
+    if member is not None:
+        if ctx.message.author.guild_permissions.administrator:
+            if number is None:
+                number = random.randint(1, 6)
+        else:
+            await ctx.send("남의 주사위를 굴릴 권한이 없어")
+            return
+    else:
+        member = ctx.message.author
+        number = random.randint(1, 6)
+    await ctx.send(f"{member.mention}이(가) 뽑은 숫자는...")
+    await sleep(1)
+    await ctx.send(f"`{number}`!")
+
+
+@bot.command(name='외치기')
+async def yell(ctx, *, content: str = None):
+    if content is None:
+        await ctx.send("외칠 내용을 같이 입력해줘")
+    else:
+        for i in ctx.author.voice.channel.members:
+            try:
+                await bot.get_user(i.id).send(f'({ctx.guild})에서 {ctx.author}: {content}')
+            except discord.errors.Forbidden:
+                await ctx.send(f"{i}에게 메시지를 보낼 수 없어ㅠㅠ")
+                embed = discord.Embed(title='메시지 허용하기', description='메시지 허용하는 법', color=0x00ff00)
+                embed.add_field(name='개인 설정',
+                                value='1."사용자 설정" 클릭\n2."개인정보 보호 및 보안"탭에서\n3.개인 메시지 허용', inline=False)
+                embed.add_field(name='서버 설정', value='1.서버이름 클릭\n2."개인정보 보호 설정" 클릭\n3.개인 메시지 허용',
+                                inline=False)
+                await ctx.send(embed=embed)
+                continue
+        await ctx.send("성공적으로 전달했어!")
+
+
+@bot.command(aliases=['계산', '짝짝스'])
+async def calculate(ctx, *, number: str = None):
+    if '_' in number:
+        await ctx.send('"헛짓거리."')
+    else:
+        await ctx.send(f"`{eval(number)}`")
+
+
+@bot.command(name='왕게임')
+async def king_game_command(ctx, cmd: str = None):
+    global king_game
+
+    if cmd is None:
+        if king_game:
+            await ctx.send("이미 게임이 진행중이야. 취소하고 다시 진행해줘 >.0")
+        else:
+            king_game.clear()
+            king_game.append(ctx.message.author)
+            await ctx.send(f"{ctx.message.author.mention}(이)가 왕게임 인원을 모으는 중이야! (참여자: {len(king_game)}명)")
+    elif cmd == "목록":
+        king_game_party = []
+        for i in king_game:
+            king_game_party.append(i.name)
+        await ctx.send(f"참여자 목록: {king_game_party}")
+    elif cmd == "참여":
+        if not king_game:
+            await ctx.send("게임을 찾을 수 없어 ㅠㅠ")
+        else:
+            if ctx.message.author in king_game:
+                await ctx.send(f"{ctx.message.author.mention} 이미 게임에 참여했어. (참여자: {len(king_game)}명)")
+            else:
+                king_game.append(ctx.message.author)
+                await ctx.send(f"{ctx.message.author.mention} 성공적으로 참여했어! (참여자: {len(king_game)}명)")
+    elif cmd == "취소":
+        king_game = []
+        await ctx.send("게임이 취소됐어")
+    elif cmd == "시작":
+        if not king_game:
+            await ctx.send("게임을 찾을 수 없어 ㅠㅠ")
+            return
+        king_game2 = []
+        for j in range(len(king_game)):
+            number = random.randrange(0, len(king_game))
+            king_game2.append(king_game[number])
+            del king_game[number]
+        await ctx.send(f"왕게임이 시작됐어 (참여자: {len(king_game2)}명)\n왕으로 뽑힌 사람은...")
+        await sleep(1)
+        await ctx.send(f"{king_game2[0].mention} (이)가 왕이야!")
+        king_game2.remove(king_game2[0])
+        await sleep(1)
+
+        embed = discord.Embed(title='메시지 허용하기', description='메시지 허용하는 법', color=0x00ff00)
+        embed.add_field(name='개인 설정', value='1."사용자 설정" 클릭\n2."개인정보 보호 및 보안"탭에서\n3.개인 메시지 허용',
+                        inline=False)
+        embed.add_field(name='서버 설정', value='1.서버이름 클릭\n2."개인정보 보호 설정" 클릭\n3.개인 메시지 허용', inline=False)
+
+        num = 0
+        for m in king_game2:
+            num += 1
+            try:
+                await bot.get_user(m.id).send(f'당신의 숫자는 `{num}` (이)야!')
+            except discord.errors.Forbidden:
+                await ctx.send(f"{ctx.message.author.mention}\n 메시지를 보낼 수 없어ㅠㅠ")
+                await ctx.send(embed=embed)
+
+        await ctx.send("왕으로 뽑힌 친구가 임무를 내릴 차례야")
+
+
+seotda_cards = ['01월(홍단)', '02월(홍단)', '03월(홍단)', '04월(초단)', '05월(초단)',
+                '06월(청단)', '07월(초단)', '08월(열끗)', '09월(청단)', '10월(청단)',
+                '01월(광)', '02월(열끗)', '03월(광)', '04월(열끗)', '05월(열끗)',
+                '06월(열끗)', '07월(열끗)', '08월(광)', '09월(열끗)', '10월(열끗)']
+seotda_game = []
+table_money = 0
+start_money = 0
+turn = 0
+racer = 0
+racer_money = 0
+calls = 0
+dies = []
+
+
+@bot.command(name='섯다')
+async def seotda(ctx, cmd: str = None, money: int = None):
+    global seotda_game, table_money, turn, start_money, racer, calls, racer_money
+
+    if cmd == '준비':
+        if seotda_game:
+            await ctx.send("이미 게임이 진행중이야. 취소하고 다시 진행해줘 >.0")
+            return
+        elif money is None or money < 1000:
+            await ctx.send("섯다는 `1000`원부터 시작할 수 있어")
+            return
+        turn = 0
+        seotda_game.append([ctx.message.author, [money, 0], None])
+        print(seotda_game)
+        table_money = money / 10
+        start_money = money
+        await ctx.send(f"{ctx.message.author.mention}(이)가 섯다 인원을 모으는 중이야! (참여자: {len(seotda_game)}명,"
+                       + f" `{money}`원 테이블)")
+    elif cmd == "목록":
+        seotda_party = []
+        for i in seotda_game:
+            if i[0].nick is None:
+                seotda_party.append(i[0].name)
+            else:
+                seotda_party.append(i[0].nick)
+        await ctx.send(f"참여자 목록: {seotda_party}")
+    elif cmd == "참여":
+        if not seotda_game:
+            await ctx.send("게임을 찾을 수 없어 ㅠㅠ")
+        else:
+            if ctx.message.author in map(lambda x: x[0], seotda_game):
+                await ctx.send(f"{ctx.message.author.mention} 이미 게임에 참여했어. (참여자: {len(seotda_game)}명)")
+            else:
+                seotda_game.append([ctx.message.author, [start_money, 0], None])
+                print(seotda_game)
+                await ctx.send(f"{ctx.message.author.mention} 성공적으로 참여했어! (참여자: {len(seotda_game)}명)")
+    elif cmd == "취소":
+        seotda_game = []
+        table_money = 0
+        start_money = 0
+        await ctx.send("게임이 취소됐어")
+    elif cmd in ('시작', '진행'):
+        if not seotda_game:
+            await ctx.send("게임을 찾을 수 없어 ㅠㅠ")
+            return
+        turn += 1
+        embed = discord.Embed(title='메시지 허용하기', description='메시지 허용하는 법', color=0x00ff00)
+        embed.add_field(name='개인 설정', value='1."사용자 설정" 클릭\n2."개인정보 보호 및 보안"탭에서\n3.개인 메시지 허용',
+                        inline=False)
+        embed.add_field(name='서버 설정', value='1.서버이름 클릭\n2."개인정보 보호 설정" 클릭\n3.개인 메시지 허용',
+                        inline=False)
+        pair = [None, None]
+        hand = []
+        for i in seotda_game:
+            if turn % 2:
+                first = random.randrange(0, len(seotda_cards))
+                pair[0] = seotda_cards[first]
+                del seotda_cards[first]
+            else:
+                second = random.randrange(0, len(seotda_cards))
+                pair[1] = seotda_cards[second]
+                del seotda_cards[second]
+            try:
+                if turn % 2:
+                    await bot.get_user(i[0].id).send(f"당신이 뽑은 `첫번째`패는 `{pair[0]}`(이)야!")
+                    hand.clear()
+                else:
+                    await bot.get_user(i[0].id).send(f"당신이 뽑은 `두번째`패는 `{pair[1]}`(이)야!")
+                for card in pair:
+                    img = None
+                    if card == '01월(광)':
+                        img = discord.File('card011.jpg')
+                    elif card == '01월(홍단)':
+                        img = discord.File('card012.jpg')
+                    elif card == '02월(열끗)':
+                        img = discord.File('card021.jpg')
+                    elif card == '02월(홍단)':
+                        img = discord.File('card022.jpg')
+                    elif card == '03월(광)':
+                        img = discord.File('card031.jpg')
+                    elif card == '03월(홍단)':
+                        img = discord.File('card032.jpg')
+                    elif card == '04월(열끗)':
+                        img = discord.File('card041.jpg')
+                    elif card == '04월(초단)':
+                        img = discord.File('card042.jpg')
+                    elif card == '05월(열끗)':
+                        img = discord.File('card051.jpg')
+                    elif card == '05월(초단)':
+                        img = discord.File('card052.jpg')
+                    elif card == '06월(열끗)':
+                        img = discord.File('card061.jpg')
+                    elif card == '06월(청단)':
+                        img = discord.File('card062.jpg')
+                    elif card == '07월(열끗)':
+                        img = discord.File('card071.jpg')
+                    elif card == '07월(초단)':
+                        img = discord.File('card072.jpg')
+                    elif card == '08월(광)':
+                        img = discord.File('card081.jpg')
+                    elif card == '08월(열끗)':
+                        img = discord.File('card082.jpg')
+                    elif card == '09월(열끗)':
+                        img = discord.File('card091.jpg')
+                    elif card == '09월(청단)':
+                        img = discord.File('card092.jpg')
+                    elif card == '10월(열끗)':
+                        img = discord.File('card101.jpg')
+                    elif card == '10월(청단)':
+                        img = discord.File('card102.jpg')
+                    if img is not None:
+                        hand.append(img)
+                    i[2] = pair
+                await i[0].send(files=hand)
+            except discord.errors.Forbidden:
+                await ctx.send(f"{ctx.message.author.mention}\n 메시지를 보낼 수 없어ㅠㅠ")
+                await ctx.send(embed=embed)
+        if turn % 2:
+            table_money = round(start_money / 50 + 2 * (turn - 1) * (start_money / 500))
+        order = {}
+        for i in seotda_game:
+            if turn % 2:
+                i[1][0] -= table_money
+            if i[0].nick is None:
+                order[i[0].name] = i[1][0]
+            else:
+                order[i[0].nick] = i[1][0]
+        await ctx.send(f"{order}의 순서대로 베팅을 시작해")
+        await ctx.send(f"{seotda_game[0][0].mention}가 베팅할 차례야!"
+                       f"\n현재 베팅금: `{table_money}`원\n남은 돈: `{seotda_game[0][1][0]}`원")
+        racer = 0
+        calls = 0
+        racer_money = table_money
+    elif cmd == "승자":
+        seotda_game[money - 1][1][0] += table_money
+        await ctx.send(f"{seotda_game[money - 1][0].mention} (이)가 이겼어. `{table_money}`원 모두 가져가."
+                       f"\n남은 돈: `{seotda_game[money - 1][1][0]}`원")
+        seotda_game += dies
+        dies.clear()
+        for i in seotda_game:
+            if i[1] <= 0:
+                await ctx.send(f"{i[0].mention}의 돈이 모두 소진됐어.\n등수: {len(seotda_game)}등")
+                seotda_game.remove(i)
+        if len(seotda_game) == 1:
+            await ctx.send(f"{seotda_game[0][0].mention}(이)가 1등이야!")
+            seotda_game.clear()
+    if turn % 2:
+        turn += 1
+
+
+@bot.command(name='베팅', aliases=['배팅'])
+async def betting(ctx, cmd: str = None, money: int = None):
+    global seotda_game, table_money, turn, start_money, racer, racer_money, calls, dies
+
+    if not ctx.message.author == seotda_game[racer][0]:
+        await ctx.send(f"{ctx.message.author.mention} 너차례가 아니야 친구. 조금만 기다려")
+        return
+    elif cmd == "레이즈":
+        if money < round(table_money / 2):
+            await ctx.send(f"베팅은 `{round(table_money / 2)}`원 부터 할 수 있어.")
+            return
+        elif seotda_game[racer][1] - money < 0:
+            await ctx.send(f"레이즈 할 수 없어. 남은 돈: `{seotda_game[racer][1][0]}`원")
+            return
+        if racer != 0:
+            seotda_game[racer][1][0] -= racer_money
+        seotda_game[racer][1][0] -= money
+        racer_money += money
+        seotda_game[racer][1][1] = racer_money
+        table_money += money
+
+        await ctx.send(f"{ctx.message.author.mention}(이)가 `{money}`원을 레이즈했어."
+                       f"\n남은 돈: `{seotda_game[racer][1]}`원")
+        calls = 0
+        racer += 1
+        if racer == len(seotda_game):
+            racer = 0
+    elif cmd == '콜':
+        money = racer_money
+        if seotda_game[racer][1] < money:
+            money = seotda_game[racer][1]
+            seotda_game[racer][1] = 0
+            await ctx.send(f"{ctx.message.author.mention}의 돈이 부족해서 강제로 `{money}`원이 올인됐어."
+                           f"\n남은 돈: `0`원")
+        table_money += money
+        seotda_game[racer][1] -= racer_money
+        if seotda_game[racer][1]:
+            await ctx.send(f"{ctx.message.author.mention}(이)가 `{money}`원을 콜했어."
+                           f"\n남은 돈: `{seotda_game[racer][1]}`원")
+        calls += 1
+        racer += 1
+        if racer == len(seotda_game):
+            racer = 0
+    elif cmd == '다이':
+        await ctx.send(f"{ctx.message.author.mention}(이)가 다이했어. 이 판이 끝나기 전까지 제외돼."
+                       f"\n남은 돈: `{seotda_game[racer][1]}`원")
+        racer += 1
+        if racer == len(seotda_game):
+            racer = 0
+        dies.append(seotda_game[racer])
+        del seotda_game[racer]
+    if len(seotda_game) == 1:
+        seotda_game[0][1] += table_money
+        await ctx.send(f"{seotda_game[0][0].mention} (이)가 이겼어. `{table_money}`원 모두 가져가."
+                       f"\n남은 돈: `{seotda_game[0][1]}`원")
+        if turn % 2:
+            turn += 1
+        return
+    else:
+        await ctx.send(f"{seotda_game[racer][0].mention}가 베팅할 차례야!"
+                       f"\n현재 판돈: `{table_money}`원\n베팅금: `{racer_money}`\n남은 돈: `{seotda_game[racer][1]}`원")
+    if calls == len(seotda_game):
+        await ctx.send(f"좋아 베팅이 모두 끝났어. 베팅금: `{table_money}`원")
+        if turn % 2:
+            await ctx.send(f"`섯다 진행`을 입력해서 두번째 패를 나눠줘.")
+        else:
+            await sleep(1)
+            await ctx.send("패를 공개해볼까...")
+            await sleep(1)
+            for i in seotda_game:
+                await sleep(1)
+                await ctx.send(f"{i[0].mention}의 패는 `{i[2]}`야!")
+
+
+@bot.command(name='채금', aliases=['채팅금지', '쉿'])
+async def mute(ctx, member: discord.Member = None):
+    if ctx.message.author.guild_permissions.administrator:
+        member = member or ctx.message.author
+        await member.remove_roles(discord.utils.get(ctx.guild.roles, name="일반사람"))
+        await member.add_roles(discord.utils.get(ctx.guild.roles, name="채금"))
+        await ctx.channel.send(str(member) + "에게 채금이 적용됐어.")
+    else:
+        await ctx.send('권한을 부여할 수 있는 권한이 없어.')
+
+
+@bot.command(name='채금해제', aliases=['해제', '해방'])
+async def unmute(ctx, member: discord.Member = None):
+    if ctx.message.author.guild_permissions.administrator:
+        member = member or ctx.message.author
+        await member.remove_roles(discord.utils.get(ctx.guild.roles, name="채금"))
+        await member.add_roles(discord.utils.get(ctx.guild.roles, name="일반사람"))
+        await ctx.guild.get_channel(ctx.channel.category_id).set_permissions(member, overwrite=None)
+        await ctx.channel.send(str(member) + "의 채금이 해제됐어.")
+    else:
+        await ctx.send('권한을 부여할 수 있는 권한이 없어.')
+
+
+@bot.command(name='지건')
+async def voice_mute(ctx, member: discord.Member = None):
+    if ctx.message.author.guild_permissions.administrator:
+        member = member or ctx.message.author
+        await member.remove_roles(discord.utils.get(ctx.guild.roles, name="일반사람"))
+        await member.add_roles(discord.utils.get(ctx.guild.roles, name="지건"))
+        await ctx.channel.send(str(member) + "에게 지건이 적용됐어.")
+    else:
+        await ctx.send('권한을 부여할 수 있는 권한이 없어.')
+
+
+@bot.command(name='텟카이')
+async def voice_unmute(ctx, member: discord.Member = None):
+    if ctx.message.author.guild_permissions.administrator:
+        member = member or ctx.message.author
+        await member.remove_roles(discord.utils.get(ctx.guild.roles, name="지건"))
+        await member.add_roles(discord.utils.get(ctx.guild.roles, name="일반사람"))
+        await ctx.guild.get_channel(ctx.channel.category_id).set_permissions(member, overwrite=None)
+        await ctx.channel.send(str(member) + "의 지건이 해제됐어.")
+    else:
+        await ctx.send('권한을 부여할 수 있는 권한이 없어.')
+
+
+@bot.command(name='김영철', aliases=['영철'])
+async def yeong_cheol(ctx, skin: str = None):
+    if skin is None:
+        await ctx.send("알아볼 스킨을 같이 입력해줘:(펑크, 황천, 아니다, 산타, 수영장, 펄스건, 3, 가능충, 삼위일체, 장군)")
+
+    elif skin == "황천" or skin == "뒤틀린":
+        embed = discord.Embed(
+            title='뒤틀린 황천의 김영철',
+            description='서사급 스킨',
+            colour=discord.Color.blue())
+        embed.set_image(url="https://cdn.discordapp.com/attachments/_____________________________________/unknown.png")
+        await ctx.send(embed=embed)
+
+    elif skin == "펑크" or skin == "화공":
+        embed = discord.Embed(
+            title='화공 펑크 김영철',
+            description='서사급 스킨',
+            colour=discord.Color.blue())
+        embed.set_image(url="https://cdn.discordapp.com/attachments/_____________________________________/39.png")
+        await ctx.send(embed=embed)
+
+    elif skin == "아니다":
+        embed = discord.Embed(
+            title='나 김영철 아니다',
+            description='서사급 스킨',
+            colour=discord.Color.blue())
+        embed.set_image(url="https://cdn.discordapp.com/attachments/_____________________________________/image0.png")
+        await ctx.send(embed=embed)
+
+    elif skin == "산타" or skin == "메리" or skin == "크리스마스":
+        embed = discord.Embed(
+            title='메리 크리스마스 김영철',
+            description='기간 한정 스킨',
+            colour=discord.Color.light_grey())
+        embed.set_image(
+            url="https://cdn.discordapp.com/attachments/_____________________________________.png")
+        await ctx.send(embed=embed)
+
+    elif skin == "수영장" or skin == "비키니":
+        embed = discord.Embed(
+            title='수영장 파티 김영철',
+            description='기간 한정 스킨',
+            colour=discord.Color.light_grey())
+        embed.set_image(url="https://cdn.discordapp.com/attachments/_____________________________________/asdasd.png")
+        await ctx.send(embed=embed)
+
+    elif skin == "펄스건" or skin == "사이보그":
+        embed = discord.Embed(
+            title='펄스건 김영철',
+            description='전설급 스킨',
+            colour=discord.Color.red())
+        embed.set_image(url="https://cdn.discordapp.com/attachments/_____________________________________/unknown.png")
+        await ctx.send(embed=embed)
+
+    elif skin == "김김김" or skin == "3":
+        embed = discord.Embed(
+            title='김김김영영영철철철',
+            description='전설급 스킨',
+            colour=discord.Color.red())
+        embed.set_image(url="https://cdn.discordapp.com/attachments/"
+                            "_____________________________________/PicsArt_12-13-02.05.52.jpg")
+        await ctx.send(embed=embed)
+
+    elif skin == "가능충" or skin == "수간충" or skin == "쌉가능":
+        embed = discord.Embed(
+            title='동물과도 가능해 영철',
+            description='전설급 스킨',
+            colour=discord.Color.red())
+        embed.set_image(url="https://cdn.discordapp.com/attachments/_____________________________________/image0.jpg")
+        await ctx.send(embed=embed)
+
+    elif skin == "트리니티" or skin == "삼위일체":
+        embed = discord.Embed(
+            title='트리니티 김영철',
+            description='초월급 스킨',
+            colour=discord.Color.purple())
+        embed.set_image(url="https://cdn.discordapp.com/attachments/"
+                            "_____________________________________/PicsArt_12-13-09.18.06.jpg")
+        await ctx.send(embed=embed)
+
+    elif skin == "장군" or skin == "맥아더" or skin == "인천":
+        embed = discord.Embed(
+            title='인천상륙작전 김영철',
+            description='신화급 스킨',
+            colour=discord.Color.gold())
+        embed.set_image(url="https://cdn.discordapp.com/attachments/_____________________________________/image0.png")
+        await ctx.send(embed=embed)
+
+
+@bot.command(name='황해찬', aliases=['해찬'])
+async def hae_chan(ctx, skin: str = None):
+    if skin is None:
+        await ctx.send("알아볼 스킨을 같이 입력해줘:(심봉사, 함성)")
+
+    elif skin == "심봉사" or skin == "호계동":
+        embed = discord.Embed(
+            title='호계동 심봉사 황해찬',
+            description='서사급 스킨',
+            colour=discord.Color.blue())
+        embed.set_image(url="https://cdn.discordapp.com/attachments/_____________________________________/image0.png")
+        await ctx.send(embed=embed)
+
+    elif skin == "힘찬" or skin == "함성":
+        embed = discord.Embed(
+            title='힘찬 함성 황해찬',
+            description='서사급 스킨',
+            colour=discord.Color.blue())
+        embed.set_image(url="https://cdn.discordapp.com/attachments/_____________________________________/image0.png")
+        await ctx.send(embed=embed)
+
+
+# noinspection SpellCheckingInspection
+bot.run("올레쉬 봇 토큰")

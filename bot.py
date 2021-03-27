@@ -44,15 +44,9 @@ async def hey_adora(ctx):
 
 
 @bot.command(aliases=['삭제'])
-async def delete(ctx, num: int = 2):
+async def delete(ctx, num: int = 1):
     await ctx.channel.purge(limit=num)
     await ctx.channel.send('비밀이양!!')
-
-
-@bot.command(aliases=['시발','씨발년아','ㅅ1발','새끼','병신','도라병신','씨빨','씨발','삭제'])
-async def delete(ctx, num: int = 2):
-    await ctx.channel.purge(limit=1)
-    await ctx.channel.send('욕은나빠!!')
 
 
 bot.run(TOKEN)

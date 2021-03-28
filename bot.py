@@ -8,18 +8,37 @@ secret_code = base64.b64decode(fake)
 print(secret_code.decode("ascii"))
 TOKEN = secret_code.decode("ascii")
 
+bad_word=['시발', '씨발', '씨빨', '시빨', 'ㅅ1발', '쉬빨', '시123발', '십팔',
+       '새끼', '개객끼', '개샛기'
+       '병신', '병1신', '병진', '병쉰', '예원쟝']
+
 
 @bot.event
 async def on_ready():
-    await bot.change_presence(status=discord.Status.online, activity=discord.Game('공부'))
+    await bot.change_presence(status=discord.Status.online, activity=discord.Game('아파'))
     print('알림!!어도라가 성공적으로 구동되었습니다!!!')
 
 
 @bot.event
 async def on_message(msg):
     if msg.author.bot:
-        return None
+        return
     await bot.process_commands(msg)
+
+
+@bot.event
+async def on_message(ctx):
+    fleg=False
+    if ctx.author.bot:
+        return
+    for i in bad_word:
+        if i in ctx.content:
+            fleg=True
+            await ctx.delete()
+    if fleg:
+        await ctx.channel.send("욕은 나쁘댓서 씨빨새끼야!!")
+
+
 
 
 @bot.command(aliases=['안녕'])
